@@ -44,14 +44,14 @@
   .hero{
     position:relative; height:78vh; min-height:420px;
     display:flex; align-items:flex-end;
-    background:#000;
+    background:linear-gradient(135deg,#4a1d2e,#8a3f5a 60%,#d88fa8);
     margin-top:-64px;
     overflow:hidden;
   }
-  .hero-video{
+  .hero-video, .hero-frame{
     position:absolute; inset:0; width:100%; height:100%;
     object-fit:cover; object-position:center center;
-    z-index:0;
+    z-index:0; border:0;
   }
   .hero::after{
     content:""; position:absolute; inset:0; z-index:1;
@@ -143,17 +143,13 @@
   </div>
 </div>
 
-<div class="hero">
-  <video class="hero-video" autoplay muted loop playsinline id="heroVideo">
-    <source src="https://drive.google.com/uc?export=download&id=16LUYDqB_I-PAlpavVhqSlNBiSTk2kJ6F" type="video/quicktime">
-  </video>
-  <iframe id="heroFallback" class="hero-video" style="display:none; border:0;" src="https://drive.google.com/file/d/16LUYDqB_I-PAlpavVhqSlNBiSTk2kJ6F/preview" allow="autoplay"></iframe>
+<div class="hero" id="heroPlayCard" data-drive-id="16LUYDqB_I-PAlpavVhqSlNBiSTk2kJ6F">
   <div class="hero-content">
     <span class="tag-pill">N SERIES</span>
     <h1 class="hero-title">Life of Farhan<br>&amp; Mayesha</h1>
     <p class="hero-logline">A love story, streaming everywhere.</p>
     <div class="hero-buttons">
-      <button class="btn btn-play">
+      <button class="btn btn-play" id="heroPlayBtn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="#111"><path d="M5 5l14 7-14 7V5z"/></svg>
         Play
       </button>
@@ -177,8 +173,6 @@
         <div class="play-overlay">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
         </div>
-        <span class="card-label">Just her</span>
-      </div>
         <span class="card-label">Just her</span>
       </div>
       <div class="card play-card grad-2" id="card-clip-2" data-drive-id="1qXjXeNZ2WMihCtgO8QzPa49ie1tRHkgG">
@@ -269,40 +263,29 @@
 <footer>Placeholder cards throughout — swap gradients for real photos and clips as they're gathered.</footer>
 
 <script>
-  // Hero plays the full-quality Drive file directly. If the direct stream
-  // can't play (Drive interstitial, codec, etc.), fall back to the Drive
-  // preview embed so the hero never just sits there broken.
-  const heroVideo = document.getElementById('heroVideo');
-  const heroFallback = document.getElementById('heroFallback');
-  if (heroVideo) {
-    heroVideo.muted = true;
-    heroVideo.loop = true;
-    const playIt = () => heroVideo.play().catch(() => {});
-    heroVideo.addEventListener('ended', () => {
-      heroVideo.currentTime = 0;
-      playIt();
-    });
-    heroVideo.addEventListener('loadedmetadata', playIt);
-    heroVideo.addEventListener('error', () => {
-      heroVideo.style.display = 'none';
-      if (heroFallback) heroFallback.style.display = 'block';
-    });
-    playIt();
+  // Every video on the site (hero + every "Her" card) streams straight
+  // from Google Drive on click/play, at full original quality — no
+  // re-encoding, no hotlinked <video src>, no base64 bloat.
+  function embedDrive(container, driveId, frameClass) {
+    if (container.classList.contains('is-playing')) return;
+    container.classList.add('is-playing');
+    const iframe = document.createElement('iframe');
+    iframe.className = frameClass;
+    iframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
+    iframe.allow = 'autoplay';
+    container.appendChild(iframe);
   }
 
-  // Every "Her" card streams straight from Drive on click, at full
-  // original quality (no re-encoding, no base64 bloat).
+  const heroCard = document.getElementById('heroPlayCard');
+  document.getElementById('heroPlayBtn')?.addEventListener('click', function (e) {
+    e.stopPropagation();
+    embedDrive(heroCard, heroCard.getAttribute('data-drive-id'), 'hero-frame');
+  });
+
   document.querySelectorAll('.play-card[data-drive-id]').forEach(card => {
     card.addEventListener('click', function () {
-      if (this.classList.contains('is-playing')) return;
-      this.classList.add('is-playing');
-      const driveId = this.getAttribute('data-drive-id');
-      const iframe = document.createElement('iframe');
-      iframe.className = 'card-frame';
-      iframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
-      iframe.allow = 'autoplay';
+      embedDrive(this, this.getAttribute('data-drive-id'), 'card-frame');
       this.querySelector('.card-label')?.remove();
-      this.appendChild(iframe);
     });
   });
 </script>

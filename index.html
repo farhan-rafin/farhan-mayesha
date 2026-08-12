@@ -44,7 +44,7 @@
   .hero{
     position:relative; height:78vh; min-height:420px;
     display:flex; align-items:flex-end;
-    background:linear-gradient(135deg,#4a1d2e,#8a3f5a 60%,#d88fa8);
+    background:#000;
     margin-top:-64px;
     overflow:hidden;
   }
@@ -143,7 +143,10 @@
   </div>
 </div>
 
-<div class="hero" id="heroPlayCard" data-drive-id="16LUYDqB_I-PAlpavVhqSlNBiSTk2kJ6F">
+<div class="hero">
+  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline>
+    <source src="media/hero.mov">
+  </video>
   <div class="hero-content">
     <span class="tag-pill">N SERIES</span>
     <h1 class="hero-title">Life of Farhan<br>&amp; Mayesha</h1>
@@ -169,12 +172,6 @@
       Her
     </div>
     <div class="row-track">
-      <div class="card play-card grad-4" id="card-clip-1" data-drive-id="1DLR9UlsZc8J3U6c0OH5WyQk7GpY4lBcJ">
-        <div class="play-overlay">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
-        </div>
-        <span class="card-label">Just her</span>
-      </div>
       <div class="card play-card grad-2" id="card-clip-2" data-drive-id="1qXjXeNZ2WMihCtgO8QzPa49ie1tRHkgG">
         <div class="play-overlay">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
@@ -263,9 +260,29 @@
 <footer>Placeholder cards throughout — swap gradients for real photos and clips as they're gathered.</footer>
 
 <script>
-  // Every video on the site (hero + every "Her" card) streams straight
-  // from Google Drive on click/play, at full original quality — no
-  // re-encoding, no hotlinked <video src>, no base64 bloat.
+  // Hero: self-hosted video, so real autoplay/loop/fullscreen all just work
+  // natively — no third-party embed involved.
+  const heroVideo = document.getElementById('heroVideo');
+  if (heroVideo) {
+    heroVideo.muted = true;
+    heroVideo.loop = true;
+    const playIt = () => heroVideo.play().catch(() => {});
+    heroVideo.addEventListener('ended', () => { heroVideo.currentTime = 0; playIt(); });
+    heroVideo.addEventListener('loadedmetadata', playIt);
+    playIt();
+  }
+
+  document.getElementById('heroPlayBtn')?.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!heroVideo) return;
+    heroVideo.muted = false;
+    heroVideo.play().catch(() => {});
+    if (heroVideo.requestFullscreen) heroVideo.requestFullscreen().catch(() => {});
+    else if (heroVideo.webkitEnterFullscreen) heroVideo.webkitEnterFullscreen();
+  });
+
+  // Remaining "Her" cards not yet self-hosted still stream from Drive on
+  // click (temporary until each movie's file is uploaded directly).
   function embedDrive(container, driveId, frameClass) {
     if (container.classList.contains('is-playing')) return;
     container.classList.add('is-playing');
@@ -275,12 +292,6 @@
     iframe.allow = 'autoplay';
     container.appendChild(iframe);
   }
-
-  const heroCard = document.getElementById('heroPlayCard');
-  document.getElementById('heroPlayBtn')?.addEventListener('click', function (e) {
-    e.stopPropagation();
-    embedDrive(heroCard, heroCard.getAttribute('data-drive-id'), 'hero-frame');
-  });
 
   document.querySelectorAll('.play-card[data-drive-id]').forEach(card => {
     card.addEventListener('click', function () {

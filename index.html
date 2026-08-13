@@ -181,7 +181,8 @@
 </div>
 
 <div class="hero">
-  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline>
+  <img class="hero-video" id="heroPoster" src="https://lh3.googleusercontent.com/d/1jwt2BllWOOt_Xgl5Ge8NDFKdXzmNQsc9=w1920" alt="Life of Farhan & Mayesha">
+  <video class="hero-video" id="heroVideo" muted loop playsinline style="display:none;">
     <source src="media/hero.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
@@ -312,25 +313,30 @@
 </div>
 
 <script>
-  // Hero: self-hosted video, so real autoplay/loop/fullscreen all just work
-  // natively — no third-party embed involved.
+  // Hero: static poster at rest; Play swaps in the self-hosted video and
+  // goes fullscreen. Self-hosted so fullscreen/playback just work natively
+  // — no third-party embed involved.
+  const heroPoster = document.getElementById('heroPoster');
   const heroVideo = document.getElementById('heroVideo');
-  if (heroVideo) {
-    heroVideo.muted = true;
-    heroVideo.loop = true;
-    const playIt = () => heroVideo.play().catch(() => {});
-    heroVideo.addEventListener('ended', () => { heroVideo.currentTime = 0; playIt(); });
-    heroVideo.addEventListener('loadedmetadata', playIt);
-    playIt();
-  }
 
   document.getElementById('heroPlayBtn')?.addEventListener('click', function (e) {
     e.stopPropagation();
     if (!heroVideo) return;
+    if (heroPoster) heroPoster.style.display = 'none';
+    heroVideo.style.display = 'block';
     heroVideo.muted = false;
     heroVideo.play().catch(() => {});
     if (heroVideo.requestFullscreen) heroVideo.requestFullscreen().catch(() => {});
     else if (heroVideo.webkitEnterFullscreen) heroVideo.webkitEnterFullscreen();
+  });
+
+  // If someone exits fullscreen, go back to showing the poster at rest.
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && heroVideo && heroVideo.style.display === 'block') {
+      heroVideo.pause();
+      heroVideo.style.display = 'none';
+      if (heroPoster) heroPoster.style.display = 'block';
+    }
   });
 
   // ---------- "Her" movies ----------

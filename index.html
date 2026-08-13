@@ -164,6 +164,10 @@
   .modal-meta .modal-kind{color:var(--gold); text-transform:uppercase; letter-spacing:0.5px; font-weight:600;}
   .modal-desc{font-size:14px; line-height:1.65; color:var(--white); max-width:620px;}
   .modal-note{margin-top:16px; font-size:12px; color:var(--gray-dim); font-style:italic;}
+  .modal-related{margin-top:24px; padding-top:20px; border-top:1px solid var(--line);}
+  .modal-related-head{font-size:13px; font-weight:600; color:var(--gray); margin-bottom:12px;}
+  .modal-related-track{display:flex; gap:10px; overflow-x:auto;}
+  .modal-related-track .card{width:130px; height:182px;}
 </style>
 </head>
 <body>
@@ -308,6 +312,10 @@
       <div class="modal-meta"><span class="modal-kind" id="modalKind"></span></div>
       <p class="modal-desc" id="modalDesc"></p>
       <p class="modal-note" id="modalNote" style="display:none;"></p>
+      <div class="modal-related" id="modalRelated" style="display:none;">
+        <div class="modal-related-head">More from this story</div>
+        <div class="modal-related-track" id="modalRelatedTrack"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -390,7 +398,8 @@
       desc: 'A thousand attempts to get one photo that finally does her justice.',
       poster: driveImg('1T4H4Gmm3lx0yH7Da6YPxvWQXsZ4waBI0', 500),
       backdrop: driveImg('1ju4Quy6q9C9WeSd_uanwkzbUVYtyMyI6', 1600),
-      video: null, driveId: null
+      video: 'media/framing-her.mp4', driveId: null,
+      related: ['intoHerEyes']
     },
     {
       id: 'roadtrip', title: 'Road trip reel', kind: 'Clip', grad: 'grad-2',
@@ -400,8 +409,22 @@
     }
   ];
 
-  const herRow = document.getElementById('herRow');
-  herMovies.forEach(movie => {
+  // Sub-movies: reachable only from inside another movie's modal (via
+  // `related`), not shown as their own tile in the Her row.
+  const subMovies = [
+    {
+      id: 'intoHerEyes', title: 'Into Her Eyes', kind: 'Short Film', grad: 'grad-7',
+      desc: 'Into Her Eyes is a quiet romance told through glances, half-smiles, and the moments that say more than words ever could. What begins as a simple fascination slowly becomes something deeper—an affection preserved in fleeting looks, soft laughter, and memories that seem to glow brighter after midnight. In every frame, he discovers another reason to fall for her, until looking into her eyes starts to feel less like a moment and more like coming home.',
+      poster: driveImg('1cCuGXiVwIL3hXY87oGkpDBBYpMiwR8b2', 500),
+      backdrop: driveImg('1L2ANKDb4_-VinmVIR_YvG2NLwrpkmtMx', 1600),
+      video: null, driveId: null
+    }
+  ];
+
+  const moviesById = {};
+  [...herMovies, ...subMovies].forEach(m => { moviesById[m.id] = m; });
+
+  function buildCard(movie) {
     const card = document.createElement('div');
     card.className = `card play-card ${movie.grad}`;
     card.innerHTML = `
@@ -413,8 +436,11 @@
       <span class="card-label">${movie.title}</span>
     `;
     card.addEventListener('click', () => openMovie(movie));
-    herRow.appendChild(card);
-  });
+    return card;
+  }
+
+  const herRow = document.getElementById('herRow');
+  herMovies.forEach(movie => herRow.appendChild(buildCard(movie)));
 
   // ---------- Detail modal ----------
   const backdrop = document.getElementById('modalBackdrop');
@@ -424,6 +450,8 @@
   const modalDesc = document.getElementById('modalDesc');
   const modalNote = document.getElementById('modalNote');
   const modalPlayBtn = document.getElementById('modalPlayBtn');
+  const modalRelated = document.getElementById('modalRelated');
+  const modalRelatedTrack = document.getElementById('modalRelatedTrack');
   let currentMovie = null;
 
   function openMovie(movie) {
@@ -443,7 +471,18 @@
     }
     modalNote.style.display = 'none';
     modalNote.textContent = '';
+
+    modalRelatedTrack.innerHTML = '';
+    const related = (movie.related || []).map(id => moviesById[id]).filter(Boolean);
+    if (related.length) {
+      related.forEach(rm => modalRelatedTrack.appendChild(buildCard(rm)));
+      modalRelated.style.display = 'block';
+    } else {
+      modalRelated.style.display = 'none';
+    }
+
     backdrop.classList.add('open');
+    backdrop.scrollTop = 0;
   }
 
   function closeModal() {

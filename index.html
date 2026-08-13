@@ -143,7 +143,8 @@
   }
   @keyframes modalIn{ from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
   .modal-hero{position:relative; aspect-ratio:16/9; overflow:hidden;}
-  .modal-hero-media{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border:0;}
+  .modal-hero-poster{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .modal-hero-media{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border:0; z-index:1;}
   .modal-hero::after{
     content:""; position:absolute; inset:0;
     background:linear-gradient(0deg, var(--black) 4%, rgba(20,20,20,0.15) 55%, rgba(0,0,0,0.35) 100%);
@@ -337,40 +338,58 @@
   // e.g. "media/where-the-water-meets-her.mp4") once a clip is uploaded and
   // transcoded to H.264 — until then the modal shows a "coming soon" note.
   // `driveId` is an optional fallback for clips still only on Drive.
+  // Poster/backdrop images are hosted on Drive and hotlinked directly —
+  // unlike video, Drive serves images inline without a forced-download
+  // response, so this is reliable and needs no local copy.
+  const driveImg = (fileId, width) => `https://lh3.googleusercontent.com/d/${fileId}=w${width}`;
+
   const herMovies = [
     {
       id: 'water', title: 'Where the Water Meets Her', kind: 'Short Film', grad: 'grad-4',
       desc: 'A quiet coastline, and the girl who made it feel like home.',
+      poster: driveImg('12JrRqK28gyfF5juA24XWKp6LzZ10JnLm', 500),
+      backdrop: driveImg('1N954w2vcXa1pZS25qEJnnXckgESYSUCT', 1600),
       video: null, driveId: null
     },
     {
       id: 'sundown', title: 'Before the Sun Goes Down', kind: 'Short Film', grad: 'grad-1',
       desc: 'Golden hour has never looked as good on anyone else.',
+      poster: driveImg('1t64dpVEBeeKmtjwGSoPaXzixtJUoMHPr', 500),
+      backdrop: driveImg('1a94uXDMFGWudcaggWuu3e1BYFvGuwmvd', 1600),
       video: null, driveId: null
     },
     {
       id: 'destination', title: 'Destination: Her', kind: 'Trailer', grad: 'grad-6',
       desc: 'Every place I have ever wanted to go started with wanting to be near her.',
+      poster: driveImg('1l_uscSgv4G-tfsUaqb8HL8kTcYcBYjgq', 500),
+      backdrop: driveImg('1BO4P68E3H0hU2h9GjuE_EYlYqZu7m5yb', 1600),
       video: null, driveId: null
     },
     {
       id: 'element', title: 'In Her Element', kind: 'Documentary', grad: 'grad-3',
       desc: 'The version of her that only shows up when she is completely herself.',
+      poster: driveImg('1KA5E0aajFMmhX9dyre-Filyk3wsYb9Ma', 500),
+      backdrop: driveImg('1I69KFRWnhE-WeyD9geNThBcYHt7P_cuM', 1600),
       video: null, driveId: null
     },
     {
       id: 'taste', title: 'The Taste of Us', kind: 'Short Film', grad: 'grad-5',
       desc: 'Every meal we have ever shared, ranked by how hard we laughed.',
+      poster: driveImg('1NV9Cq1jth5KkowOF057kkfkzH15q6et0', 500),
+      backdrop: driveImg('1Nf240QXo8XbMPWw4QzmOsav-B1dnQWzv', 1600),
       video: null, driveId: null
     },
     {
       id: 'framing', title: 'Framing Her', kind: 'Photo Reel', grad: 'grad-8',
       desc: 'A thousand attempts to get one photo that finally does her justice.',
+      poster: driveImg('1T4H4Gmm3lx0yH7Da6YPxvWQXsZ4waBI0', 500),
+      backdrop: driveImg('1ju4Quy6q9C9WeSd_uanwkzbUVYtyMyI6', 1600),
       video: null, driveId: null
     },
     {
       id: 'roadtrip', title: 'Road trip reel', kind: 'Clip', grad: 'grad-2',
       desc: 'Windows down, playlist on shuffle, and nowhere we needed to be.',
+      poster: null, backdrop: null,
       video: null, driveId: '1qXjXeNZ2WMihCtgO8QzPa49ie1tRHkgG'
     }
   ];
@@ -380,6 +399,7 @@
     const card = document.createElement('div');
     card.className = `card play-card ${movie.grad}`;
     card.innerHTML = `
+      ${movie.poster ? `<img class="card-poster" src="${movie.poster}" alt="${movie.title}" loading="lazy">` : ''}
       <span class="card-kind">${movie.kind}</span>
       <div class="play-overlay">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
@@ -407,6 +427,14 @@
     modalDesc.textContent = movie.desc;
     modalHero.className = `modal-hero ${movie.grad}`;
     modalHero.querySelector('.modal-hero-media')?.remove();
+    modalHero.querySelector('.modal-hero-poster')?.remove();
+    if (movie.backdrop) {
+      const poster = document.createElement('img');
+      poster.className = 'modal-hero-poster';
+      poster.src = movie.backdrop;
+      poster.alt = movie.title;
+      modalHero.insertBefore(poster, modalHero.firstChild);
+    }
     modalNote.style.display = 'none';
     modalNote.textContent = '';
     backdrop.classList.add('open');
@@ -415,6 +443,7 @@
   function closeModal() {
     backdrop.classList.remove('open');
     modalHero.querySelector('.modal-hero-media')?.remove();
+    modalHero.querySelector('.modal-hero-poster')?.remove();
     currentMovie = null;
   }
 

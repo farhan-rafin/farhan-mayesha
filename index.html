@@ -185,8 +185,8 @@
 </div>
 
 <div class="hero">
-  <img class="hero-video" id="heroPoster" src="https://lh3.googleusercontent.com/d/1jwt2BllWOOt_Xgl5Ge8NDFKdXzmNQsc9=w1920" alt="Life of Farhan & Mayesha">
-  <video class="hero-video" id="heroVideo" muted loop playsinline style="display:none;">
+  <img class="hero-video" id="heroPoster" src="https://lh3.googleusercontent.com/d/1jwt2BllWOOt_Xgl5Ge8NDFKdXzmNQsc9=w1920" alt="Life of Farhan &amp; Mayesha" fetchpriority="high" decoding="async">
+  <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" style="display:none;">
     <source src="media/hero.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
@@ -428,7 +428,7 @@
     const card = document.createElement('div');
     card.className = `card play-card ${movie.grad}`;
     card.innerHTML = `
-      ${movie.poster ? `<img class="card-poster" src="${movie.poster}" alt="${movie.title}" loading="lazy">` : ''}
+      ${movie.poster ? `<img class="card-poster" src="${movie.poster}" alt="${movie.title}" loading="lazy" decoding="async">` : ''}
       <span class="card-kind">${movie.kind}</span>
       <div class="play-overlay">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>

@@ -235,15 +235,9 @@
   <div class="row">
     <div class="row-head">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l17-7-6 17-3-7-8-3z"/></svg>
-      Our big moments
+      Six years to this
     </div>
-    <div class="row-track">
-      <div class="card grad-2"><span class="card-kind">Trip</span><span class="card-label">Bali sunset</span></div>
-      <div class="card grad-3"><span class="card-kind">Trip</span><span class="card-label">Road trip north</span></div>
-      <div class="card grad-5"><span class="card-kind">Event</span><span class="card-label">Diu bridge</span></div>
-      <div class="card grad-1"><span class="card-kind">Event</span><span class="card-label">Mehendi night</span></div>
-      <div class="card grad-4"><span class="card-kind">Trip</span><span class="card-label">The proposal</span></div>
-    </div>
+    <div class="row-track" id="sixYearsRow"></div>
   </div>
 
   <div class="row">
@@ -462,6 +456,46 @@
 
   const herRow = document.getElementById('herRow');
   herMovies.forEach(movie => herRow.appendChild(buildCard(movie)));
+
+  // ---------- "Six years to this" ----------
+  // Posters still coming for three of these — they render as gradient
+  // placeholders with a coming-soon modal until uploaded, same pattern
+  // as the Her row.
+  const sixYearsMovies = [
+    {
+      id: 'proposal-before-forever', title: 'The Proposal Before the Forever', kind: 'Short Film', grad: 'grad-1',
+      desc: 'The quiet minutes before everything changed.',
+      poster: null, backdrop: null, video: null, driveId: null
+    },
+    {
+      id: 'hues-getting-married', title: "Hue's Getting Married", kind: 'Wedding Special', grad: 'grad-5',
+      desc: "Color, chaos, and family — the days leading up to 'I do.'",
+      poster: null, backdrop: null, video: null, driveId: null
+    },
+    {
+      id: 'rang-rhythms', title: 'Rang & Rhythms', kind: 'Wedding Special', grad: 'grad-3',
+      desc: 'When vibrant traditions meet modern romance, two hearts unite in an unforgettable night of music, dance, and intricate henna.',
+      poster: driveImg('11neWkgljIETiLHe3MIX81XLEmlva9fI9', 500),
+      backdrop: driveImg('1AgdMuvIjBI1M9VNIy_wPuPxhgz-IGMj3', 1600),
+      video: null, driveId: null
+    },
+    {
+      id: 'six-years-to-this', title: 'Six Years to This', kind: 'Documentary', grad: 'grad-6',
+      desc: 'Six years, a thousand small moments, and the story that led here.',
+      poster: null, backdrop: null, video: null, driveId: null
+    },
+    {
+      id: 'vows-vision', title: 'Vows & Vision', kind: 'Wedding Special', grad: 'grad-4',
+      desc: 'After the final vows are spoken, their private vision unfolds. Farhan and Mayesha navigate the quiet, breathtaking aftermath of their union, creating a new story by the tranquil sunset water.',
+      poster: driveImg('1DOixySQTsDPD1EnSUY0mGR-7ajPfL7iM', 500),
+      backdrop: driveImg('1Mhn7rpvR9iYpHWyEY2G-YVsoPP16ILa_', 1600),
+      video: null, driveId: null
+    }
+  ];
+  sixYearsMovies.forEach(m => { moviesById[m.id] = m; });
+
+  const sixYearsRow = document.getElementById('sixYearsRow');
+  sixYearsMovies.forEach(movie => sixYearsRow.appendChild(buildCard(movie)));
 
   // ---------- Detail modal ----------
   const backdrop = document.getElementById('modalBackdrop');
